@@ -1,0 +1,136 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class SparseMatrix {
+private:
+    // Each element will store (row, col, value) for non-zero elements
+    struct Element {
+        int row;
+        int col;
+        int value;
+
+        Element(int r, int c, int v) : row(r), col(c), value(v) {}
+    };
+
+    vector<Element> elements;  // To store non-zero elements
+    int rows, cols;
+
+public:
+    // Constructor to initialize rows and columns of the matrix
+    SparseMatrix(int r, int c) : rows(r), cols(c) {}
+
+    // Function to add a non-zero element to the sparse matrix
+    void addElement(int r, int c, int v) {
+        if (v != 0) {
+            elements.push_back(Element(r, c, v));
+        }
+    }
+
+    // Function to display the sparse matrix in a readable format
+    void display() {
+        cout << "Sparse Matrix Representation (row, column, value):\n";
+        for (const auto& elem : elements) {
+            cout << "(" << elem.row << ", " << elem.col << ", " << elem.value << ")\n";
+        }
+    }
+
+    // Function to get the value at a specific (row, col) position
+    int getValue(int r, int c) {
+        for (const auto& elem : elements) {
+            if (elem.row == r && elem.col == c) {
+                return elem.value;
+            }
+        }
+        return 0;  // Return 0 if the element is not present (default value)
+    }
+
+    // Function to display the full matrix with zeros for missing elements
+    void fullMatrixDisplay() {
+        cout << "Full Matrix Representation (including zeros):\n";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int val = getValue(i, j);
+                cout << val << " ";
+            }
+            cout << endl;
+        }
+    }
+
+    // Function to add two sparse matrices
+    SparseMatrix add(SparseMatrix& other) {
+        if (this->rows != other.rows || this->cols != other.cols) {
+            cout << "Matrix dimensions do not match for addition!" << endl;
+            exit(1);
+        }
+
+        SparseMatrix result(this->rows, this->cols);
+
+        // Add elements from the first matrix
+        for (const auto& elem : this->elements) {
+            result.addElement(elem.row, elem.col, elem.value);
+        }
+
+        // Add elements from the second matrix
+        for (const auto& elem : other.elements) {
+            int existingValue = result.getValue(elem.row, elem.col);
+            result.addElement(elem.row, elem.col, existingValue + elem.value);
+        }
+
+        return result;
+    }
+
+    // Function to multiply two sparse matrices
+    SparseMatrix multiply(SparseMatrix& other) {
+        if (this->cols != other.rows) {
+            cout << "Matrix dimensions do not match for multiplication!" << endl;
+            exit(1);
+        }
+
+        SparseMatrix result(this->rows, other.cols);
+
+        for (const auto& elemA : this->elements) {
+            for (const auto& elemB : other.elements) {
+                if (elemA.col == elemB.row) {
+                    int newValue = elemA.value * elemB.value;
+                    int existingValue = result.getValue(elemA.row, elemB.col);
+                    result.addElement(elemA.row, elemB.col, existingValue + newValue);
+                }
+            }
+        }
+
+        return result;
+    }
+};
+
+// Main function to test the SparseMatrix class
+int main() {
+    // Create sparse matrices
+    SparseMatrix mat1(3, 3);  // 3x3 matrix
+    mat1.addElement(0, 0, 5);
+    mat1.addElement(1, 2, 8);
+    mat1.addElement(2, 1, 4);
+
+    SparseMatrix mat2(3, 3);  // 3x3 matrix
+    mat2.addElement(0, 1, 2);
+    mat2.addElement(1, 2, 3);
+    mat2.addElement(2, 0, 6);
+
+    // Display sparse matrix representation
+    mat1.display();
+    mat2.display();
+
+    // Full matrix display
+    mat1.fullMatrixDisplay();
+    mat2.fullMatrixDisplay();
+
+    // Add matrices
+    SparseMatrix sum = mat1.add(mat2);
+    sum.display();
+
+    // Multiply matrices
+    SparseMatrix product = mat1.multiply(mat2);
+    product.display();
+
+    return 0;
+}

@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <set>
+
+const int INF = std::numeric_limits<int>::max();
+
+// Function to find the vertex with the minimum distance value, from the set of vertices not yet included in the shortest path tree
+int minDistance(const std::vector<int>& dist, const std::vector<bool>& sptSet, int V) {
+    int min = INF, min_index;
+    for (int v = 0; v < V; v++)
+        if (!sptSet[v] && dist[v] <= min)
+            min = dist[v], min_index = v;
+    return min_index;
+}
+
+// Function to print the constructed distance array
+void printSolution(const std::vector<int>& dist, int V) {
+    std::cout << "Vertex \t Distance from Source\n";
+    for (int i = 0; i < V; i++)
+        std::cout << i << " \t\t " << dist[i] << std::endl;
+}
+
+// Function that implements Dijkstra's single source shortest path algorithm for a graph represented using adjacency matrix representation
+void dijkstra(const std::vector<std::vector<int>>& graph, int src) {
+    int V = graph.size();
+    std::vector<int> dist(V, INF); // The output array. dist[i] will hold the shortest distance from src to i
+    std::vector<bool> sptSet(V, false); // sptSet[i] will be true if vertex i is included in the shortest path tree or the shortest distance from src to i is finalized
+
+    dist[src] = 0; // Distance of source vertex from itself is always 0
+
+    // Find shortest path for all vertices
+    for (int count = 0; count < V - 1; count++) {
+        // Pick the minimum distance vertex from the set of vertices not yet processed
+        int u = minDistance(dist, sptSet, V);
+
+        // Mark the picked vertex as processed
+        sptSet[u] = true;
+
+        // Update dist value of the adjacent vertices of the picked vertex
+        for (int v = 0; v < V; v++)
+            // Update dist[v] only if is not in sptSet, there is an edge from u to v, and total weight of path from src to v through u is smaller than the current value of dist[v]
+            if (!sptSet[v] && graph[u][v] && dist[u] != INF && dist[u] + graph[u][v] < dist[v])
+                dist[v] = dist[u] + graph[u][v];
+    }
+
+    // print the constructed distance array
+    printSolution(dist, V);
+}
+
+int main() {
+    // Example graph represented as an adjacency matrix
+    std::vector<std::vector<int>> graph = {
+        {0, 10, INF, INF, 3},
+        {10, 0, 2, INF, 4},
+        {INF, 2, 0, 9, 8},
+        {INF, INF, 9, 0, 2},
+        {3, 4, 8, 2, 0}
+    };
+    
+    dijkstra(graph, 0); // Assuming 0 is the source vertex (A)
+    return 0;
+}

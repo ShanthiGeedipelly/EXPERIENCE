@@ -1,0 +1,50 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    string s1 = "ABAB";
+    string s2 = "BABA";
+
+    int n = s1.length();
+    int m = s2.length();
+
+    vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+
+    int maxLen = 0;
+    int endIndex = 0;
+
+    // Build DP table
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            if (s1[i - 1] == s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+
+                if (dp[i][j] > maxLen) {
+                    maxLen = dp[i][j];
+                    endIndex = i;
+                }
+            } else {
+                dp[i][j] = 0;
+            }
+        }
+    }
+
+    // Print DP table
+    cout << "Lookup Table:\n";
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= m; j++) {
+            cout << dp[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    // Extract longest common substring
+    string lcs = s1.substr(endIndex - maxLen, maxLen);
+
+    cout << "\nLongest Common Substring: " << lcs << endl;
+    cout << "Length: " << maxLen << endl;
+
+    return 0;
+}
